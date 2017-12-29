@@ -9,7 +9,6 @@ import com.beust.jcommander.MissingCommandException;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.google.common.net.HostAndPort;
-import org.jline.builtins.Completers;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
@@ -39,7 +38,7 @@ public class Main {
   private static List<BufferedImage> images = new ArrayList<>();
 
   public static void main(String[] args) throws IOException, SaneException {
-    mainJCommander = initializeJCommander();
+    mainJCommander = new JCommander();
     GlobalOptions o = new GlobalOptions();
     mainJCommander.addObject(o);
     mainJCommander.parse(args);
@@ -69,7 +68,7 @@ public class Main {
       String prompt =
           hostName + (currentDevice != null ? (":" + currentDevice.getName()) : "") + "> ";
       try {
-        mainJCommander = initializeJCommander();
+        mainJCommander = initializeJCommanderWithCommands();
         rawLine = reader.readLine(prompt);
       } catch (EndOfFileException e) {
         break;
@@ -103,7 +102,7 @@ public class Main {
     System.out.println("Done! Goodbye.");
   }
 
-  private static JCommander initializeJCommander() {
+  private static JCommander initializeJCommanderWithCommands() {
     JCommander result = new JCommander();
     result.addCommand("help", new HelpCommand());
     result.addCommand("quit", new QuitCommand());
