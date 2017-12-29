@@ -1,0 +1,14 @@
+task installGitHooks(type: Copy) {
+    from new File(rootProject.rootDir, 'pre-push')
+    into { new File(rootProject.rootDir, '.git/hooks') }
+}
+
+allprojects {
+  afterEvaluate {
+    for (def task in it.tasks) {
+      if (task != rootProject.tasks.installGitHooks) {
+        task.dependsOn rootProject.tasks.installGitHooks
+      }
+    }
+  }
+}
