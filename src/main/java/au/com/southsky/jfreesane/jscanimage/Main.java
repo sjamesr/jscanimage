@@ -1,8 +1,10 @@
 package au.com.southsky.jfreesane.jscanimage;
 
+import au.com.southsky.jfreesane.RateLimitingScanListeners;
 import au.com.southsky.jfreesane.SaneDevice;
 import au.com.southsky.jfreesane.SaneException;
 import au.com.southsky.jfreesane.SaneSession;
+import au.com.southsky.jfreesane.ScanListenerAdapter;
 import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.MissingCommandException;
@@ -13,16 +15,19 @@ import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.ParsedLine;
+import org.jline.reader.UserInterruptException;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The entry point for jscanimage.
@@ -31,11 +36,13 @@ public class Main {
 
   private static JCommander mainJCommander;
   private static Map<String, Command> commands;
+  private static boolean warnedUser = false;
   private static boolean shouldQuit = false;
   private static String hostName;
   private static SaneSession session;
   private static SaneDevice currentDevice;
   private static List<BufferedImage> images = new ArrayList<>();
+  private static List<Instant> acquisitionTimes = new ArrayList<>();
 
   public static void main(String[] args) throws IOException, SaneException {
     mainJCommander = new JCommander();
@@ -70,10 +77,15 @@ public class Main {
       try {
         mainJCommander = initializeJCommanderWithCommands();
         rawLine = reader.readLine(prompt);
-      } catch (EndOfFileException e) {
-        break;
+      } catch (EndOfFileException | UserInterruptException e) {
+        if (userReallyWantsToQuit()) {
+          break;
+        } else {
+          continue;
+        }
       }
 
+      warnedUser = false;
       ParsedLine parsedLine = reader.getParsedLine();
       if (parsedLine == null) {
         break;
@@ -102,6 +114,15 @@ public class Main {
     System.out.println("Done! Goodbye.");
   }
 
+  private static boolean userReallyWantsToQuit() {
+    if (!images.isEmpty() && !warnedUser) {
+      System.out.println(images.size() + " image(s) will be lost, interrupt again to confirm.");
+      warnedUser = true;
+      return false;
+    }
+    return true;
+  }
+
   private static JCommander initializeJCommanderWithCommands() {
     JCommander result = new JCommander();
     result.addCommand("help", new HelpCommand());
@@ -111,6 +132,7 @@ public class Main {
     result.addCommand("close", new CloseDeviceCommand());
     result.addCommand("scan", new ScanCommand());
     result.addCommand("jpeg", new JpegCommand());
+    result.addCommand("status", new StatusCommand());
     return result;
   }
 
@@ -249,7 +271,29 @@ public class Main {
         }
       } else {
         try {
-          images.add(currentDevice.acquireImage());
+          images.add(
+              currentDevice.acquireImage(
+                  RateLimitingScanListeners.noMoreFrequentlyThan(
+                      new ScanListenerAdapter() {
+                        @Override
+                        public void recordRead(
+                            SaneDevice device, int totalBytesRead, int imageSize) {
+                          if (imageSize > 0) {
+                            System.out.println(
+                                String.format(
+                                    "Acquiring %2.2f%% done",
+                                    (totalBytesRead / (double) imageSize) * 100));
+                          }
+                        }
+
+                        @Override
+                        public void scanningFinished(SaneDevice device) {
+                          System.out.println("Done!");
+                        }
+                      },
+                      200,
+                      TimeUnit.MILLISECONDS)));
+          acquisitionTimes.add(Instant.now());
           currentDevice.cancel();
         } catch (IOException | SaneException e) {
           e.printStackTrace();
@@ -298,6 +342,37 @@ public class Main {
       }
 
       images.clear();
+      acquisitionTimes.clear();
+    }
+  }
+
+  @Parameters(
+    commandNames = "status",
+    commandDescription = "show the status of the current session"
+  )
+  private static class StatusCommand implements Command {
+
+    @Override
+    public void execute(List<String> parameters) {
+      System.out.println("Connected to " + hostName);
+      if (currentDevice == null) {
+        System.out.println("No current device (use 'ls' and 'open' to open one).");
+      } else {
+        System.out.println("Current device is " + currentDevice.getName());
+        if (!currentDevice.isOpen()) {
+          System.out.println("Device is closed (use 'open' to open it).");
+        }
+      }
+
+      if (images.isEmpty()) {
+        System.out.println("No images in this session (use 'scan' or 'scanadf' to acquire them)");
+      } else {
+        System.out.println("Images:");
+        for (int i = 0; i < images.size(); i++) {
+          System.out.println("#" + i + " acquired " + acquisitionTimes.get(i));
+        }
+        System.out.println("End of images list.");
+      }
     }
   }
 
