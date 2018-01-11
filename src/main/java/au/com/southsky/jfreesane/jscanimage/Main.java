@@ -22,22 +22,19 @@ import java.util.Map;
  */
 public class Main {
 
-  private static Map<String, Command> commands;
   private static Session session;
 
   public static void main(String[] args) throws IOException, SaneException {
     session = new Session();
-    JCommander mainJCommander = new JCommander();
+    JCommander globalOptionsParser = new JCommander();
     GlobalOptions o = new GlobalOptions();
-    mainJCommander.addObject(o);
-    mainJCommander.parse(args);
+    globalOptionsParser.addObject(o);
+    globalOptionsParser.parse(args);
 
     if (o.help) {
-      mainJCommander.usage();
+      globalOptionsParser.usage();
       System.exit(0);
     }
-
-    session.setMainJCommander(mainJCommander);
 
     System.out.println("Connecting to " + o.saneServer + "...");
     InetAddress addr = InetAddress.getByName(o.saneServer.getHost());
@@ -65,7 +62,7 @@ public class Main {
                   : "")
               + "> ";
       try {
-        mainJCommander = initializeJCommanderWithCommands();
+        session.setMainJCommander(initializeJCommanderWithCommands());
         rawLine = reader.readLine(prompt);
       } catch (EndOfFileException | UserInterruptException e) {
         if (userReallyWantsToQuit()) {
@@ -85,14 +82,18 @@ public class Main {
         break;
       }
       try {
-        mainJCommander.parse(parsedLine.words().toArray(new String[0]));
+        session.getMainJCommander().parse(parsedLine.words().toArray(new String[0]));
       } catch (MissingCommandException e) {
         System.out.println(
             "Command '" + e.getUnknownCommand() + "' not found (try 'help' for help).");
         continue;
       }
 
-      JCommander jc = mainJCommander.getCommands().get(mainJCommander.getParsedCommand());
+      JCommander jc =
+          session
+              .getMainJCommander()
+              .getCommands()
+              .get(session.getMainJCommander().getParsedCommand());
       if (jc.getObjects().size() != 1) {
         throw new IllegalStateException("expected exactly one JCommander object");
       }
@@ -128,6 +129,7 @@ public class Main {
     result.addCommand("scan", new ScanCommand());
     result.addCommand("jpeg", new JpegCommand());
     result.addCommand("status", new StatusCommand());
+    result.addCommand("auth", new AuthCommand());
     return result;
   }
 
