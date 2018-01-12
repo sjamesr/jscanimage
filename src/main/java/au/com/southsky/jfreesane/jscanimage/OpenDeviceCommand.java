@@ -24,6 +24,7 @@ class OpenDeviceCommand implements Command {
       if (currentDevice != null && currentDevice.isOpen()) {
         System.out.println("Closing " + currentDevice.getName() + "...");
         currentDevice.close();
+        session.setCurrentDevice(null);
         System.out.println("Closed.");
       }
       System.out.println("Opening " + scannerName + "...");
