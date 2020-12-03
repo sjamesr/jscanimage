@@ -26,3 +26,7 @@ task printFormatHelperMessage {
 }
 verifyGoogleJavaFormat.finalizedBy printFormatHelperMessage
 printFormatHelperMessage.onlyIf { verifyGoogleJavaFormat.state.failure != null }
+
+wrapper {
+  gradleVersion = '6.7.1'
+}
