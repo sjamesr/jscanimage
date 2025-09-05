@@ -1,32 +1,20 @@
 plugins {
   id 'application'
-  id 'com.github.sherter.google-java-format' version '0.3.2'
 }
 
-mainClassName = 'au.com.southsky.jfreesane.jscanimage.Main'
+application {
+  mainClass = 'au.com.southsky.jfreesane.jscanimage.Main'
+}
 
 repositories {
-  jcenter()
+  mavenCentral()
 }
 
 dependencies {
-  compile 'com.beust:jcommander:1.71'
-  compile 'com.google.guava:guava:23.6-jre'
-  compile 'com.googlecode.jfreesane:jfreesane:0.98'
-  compile 'net.java.dev.jna:jna:4.5.1'
-  compile 'org.jline:jline:3.5.1'
+  implementation 'org.jcommander:jcommander:2.0'
+  implementation 'com.google.guava:guava:32.0.1-jre'
+  implementation 'com.googlecode.jfreesane:jfreesane:1.0'
+  implementation 'net.java.dev.jna:jna:4.5.1'
+  implementation 'org.jline:jline:3.30.5'
 }
 
-// If Java formatter checks fail, tell the user how to fix them.
-task printFormatHelperMessage {
-  doLast {
-    throw new GradleException('google-java-format is required.\n' +
-        'Use ./gradlew googleJavaFormat to reformat the broken files')
-  }
-}
-verifyGoogleJavaFormat.finalizedBy printFormatHelperMessage
-printFormatHelperMessage.onlyIf { verifyGoogleJavaFormat.state.failure != null }
-
-wrapper {
-  gradleVersion = '6.7.1'
-}
