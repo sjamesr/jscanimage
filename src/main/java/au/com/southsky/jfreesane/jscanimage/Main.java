@@ -7,25 +7,21 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.MissingCommandException;
 import com.beust.jcommander.Parameter;
 import com.google.common.net.HostAndPort;
-import org.jline.reader.EndOfFileException;
-import org.jline.reader.LineReader;
-import org.jline.reader.LineReaderBuilder;
-import org.jline.reader.ParsedLine;
-import org.jline.reader.UserInterruptException;
+import org.jline.reader.*;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.Map;
+import java.util.List;
 
 /**
  * The entry point for jscanimage.
  */
 public class Main {
 
-  private static Session session;
+  private Session session;
 
   public static void main(String[] args) throws IOException, SaneException {
-    session = new Session();
+    Session session = new Session();
     JCommander globalOptionsParser = new JCommander();
     GlobalOptions o = new GlobalOptions();
     globalOptionsParser.addObject(o);
@@ -48,7 +44,17 @@ public class Main {
     session.setSaneSession(saneSession);
     System.out.println("Connected.");
 
-    LineReader reader = LineReaderBuilder.builder().build();
+    new Main(session).beginInteractiveSession();
+  }
+
+  private Main(Session session) {
+    this.session = session;
+  }
+
+  public void beginInteractiveSession() throws IOException {
+    LineReader reader = LineReaderBuilder.builder().completer(new SessionCompleter()).build();
+    session.setMainJCommander(initializeJCommanderWithCommands());
+
     String rawLine;
     do {
       if (session.shouldQuit()) {
@@ -62,7 +68,6 @@ public class Main {
                   : "")
               + "> ";
       try {
-        session.setMainJCommander(initializeJCommanderWithCommands());
         rawLine = reader.readLine(prompt);
       } catch (EndOfFileException | UserInterruptException e) {
         if (userReallyWantsToQuit()) {
@@ -89,18 +94,15 @@ public class Main {
         continue;
       }
 
-      JCommander jc =
-          session
-              .getMainJCommander()
-              .getCommands()
-              .get(session.getMainJCommander().getParsedCommand());
+      JCommander jc = session.getMainJCommander()
+          .getCommands()
+          .get(session.getMainJCommander().getParsedCommand());
       if (jc.getObjects().size() != 1) {
         throw new IllegalStateException("expected exactly one JCommander object");
       }
-      if (!(jc.getObjects().get(0) instanceof Command)) {
+      if (!(jc.getObjects().getFirst() instanceof Command c)) {
         throw new IllegalStateException("expected JCommander.getObject(0) to be of type Command");
       }
-      Command c = (Command) jc.getObjects().get(0);
       c.execute(session, parsedLine.words());
     } while (true);
 
@@ -109,7 +111,7 @@ public class Main {
     System.out.println("Done! Goodbye.");
   }
 
-  private static boolean userReallyWantsToQuit() {
+  private boolean userReallyWantsToQuit() {
     if (!session.getImages().isEmpty() && !session.didWarnUser()) {
       System.out.println(
           session.getImages().size() + " image(s) will be lost, interrupt again to confirm.");
@@ -148,6 +150,18 @@ public class Main {
     @Override
     public HostAndPort convert(String value) {
       return HostAndPort.fromString(value);
+    }
+  }
+
+  private class SessionCompleter implements Completer {
+    @Override
+    public void complete(LineReader lineReader, ParsedLine parsedLine, List<Candidate> list) {
+      JCommander c = session.getMainJCommander()
+              .getCommands()
+              .get(parsedLine.words().getFirst());
+      if (c != null && c.getObjects().size() == 1 && c.getObjects().getFirst() instanceof Command command) {
+        command.getCompleter(session).complete(lineReader, parsedLine, list);
+      }
     }
   }
 }

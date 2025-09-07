@@ -7,7 +7,6 @@ import au.com.southsky.jfreesane.ScanListenerAdapter;
 import com.beust.jcommander.Parameters;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -38,10 +37,9 @@ class ScanCommand implements Command {
                       @Override
                       public void recordRead(SaneDevice device, int totalBytesRead, int imageSize) {
                         if (imageSize > 0) {
-                          System.out.println(
-                              String.format(
-                                  "Acquiring %2.2f%% done",
-                                  (totalBytesRead / (double) imageSize) * 100));
+                          System.out.printf(
+                                  "Acquiring %2.2f%% done%n",
+                              (totalBytesRead / (double) imageSize) * 100);
                         }
                       }
 

@@ -2,6 +2,8 @@ package au.com.southsky.jfreesane.jscanimage;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import org.jline.builtins.Completers;
+import org.jline.reader.Completer;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -51,5 +53,10 @@ class JpegCommand implements Command {
     }
 
     session.clearImages();
+  }
+
+  @Override
+  public Completer getCompleter(Session session) {
+    return new Completers.FileNameCompleter();
   }
 }

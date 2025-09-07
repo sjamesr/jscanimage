@@ -20,6 +20,7 @@ public class Session {
   private List<BufferedImage> images = new ArrayList<>();
   private List<Instant> acquisitionTimes = new ArrayList<>();
   private JCommander mainJCommander;
+  private final List<SaneDevice> devicesSeen = new ArrayList<>();
 
   public boolean shouldQuit() {
     return shouldQuit;
@@ -89,5 +90,17 @@ public class Session {
 
   public void setMainJCommander(JCommander mainJCommander) {
     this.mainJCommander = mainJCommander;
+  }
+
+  public void addSeenDevice(SaneDevice device) {
+    devicesSeen.add(device);
+  }
+
+  public List<SaneDevice> getDevicesSeen() {
+    return devicesSeen;
+  }
+
+  public void clearDevicesSeen() {
+    devicesSeen.clear();
   }
 }
