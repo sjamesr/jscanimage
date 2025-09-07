@@ -33,7 +33,9 @@ class OpenDeviceCommand implements Command {
       System.out.println("Opening " + name + "...");
       currentDevice = session.getSaneSession().getDevice(name);
       currentDevice.open();
-      System.out.println("Opened.");
+      System.out.println("Opened, fetching options...");
+      currentDevice.listOptions();
+      System.out.println("Done!");
       session.setCurrentDevice(currentDevice);
     } catch (IOException | SaneException e) {
       e.printStackTrace();

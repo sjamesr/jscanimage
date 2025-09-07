@@ -126,6 +126,7 @@ public class Main {
     result.addCommand("quit", new QuitCommand());
     result.addCommand("open", new OpenDeviceCommand());
     result.addCommand("ls", new ListScannersCommand());
+    result.addCommand("options", new OptionsCommand());
     result.addCommand("close", new CloseDeviceCommand());
     result.addCommand("scan", new ScanCommand());
     result.addCommand("jpeg", new JpegCommand());
