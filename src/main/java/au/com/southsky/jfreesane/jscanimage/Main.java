@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.List;
 import org.jline.reader.*;
+import org.jline.reader.impl.completer.StringsCompleter;
 
 /**
  * The entry point for jscanimage.
@@ -51,8 +52,8 @@ public class Main {
   }
 
   public void beginInteractiveSession() throws IOException {
-    LineReader reader = LineReaderBuilder.builder().completer(new SessionCompleter()).build();
     session.setMainJCommander(initializeJCommanderWithCommands());
+    LineReader reader = LineReaderBuilder.builder().completer(new SessionCompleter()).build();
 
     String rawLine;
     do {
@@ -154,6 +155,13 @@ public class Main {
   }
 
   private class SessionCompleter implements Completer {
+
+    private final Completer commandNameCompleter;
+
+    public SessionCompleter() {
+      commandNameCompleter = new StringsCompleter(session.getMainJCommander().getCommands().keySet());
+    }
+
     @Override
     public void complete(LineReader lineReader, ParsedLine parsedLine, List<Candidate> list) {
       JCommander c = session.getMainJCommander()
@@ -161,6 +169,8 @@ public class Main {
               .get(parsedLine.words().getFirst());
       if (c != null && c.getObjects().size() == 1 && c.getObjects().getFirst() instanceof Command command) {
         command.getCompleter(session).complete(lineReader, parsedLine, list);
+      } else {
+        commandNameCompleter.complete(lineReader, parsedLine, list);
       }
     }
   }
