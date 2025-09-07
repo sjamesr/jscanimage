@@ -2,14 +2,12 @@ package au.com.southsky.jfreesane.jscanimage;
 
 import au.com.southsky.jfreesane.SaneDevice;
 import com.beust.jcommander.Parameters;
-
 import java.io.IOException;
 import java.util.List;
 
 @Parameters(
-  commandNames = "close",
-  commandDescription = "closes the currently opened device (if any)"
-)
+    commandNames = "close",
+    commandDescription = "closes the currently opened device (if any)")
 class CloseDeviceCommand implements Command {
 
   @Override

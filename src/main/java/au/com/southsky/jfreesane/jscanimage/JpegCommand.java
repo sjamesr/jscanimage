@@ -2,15 +2,14 @@ package au.com.southsky.jfreesane.jscanimage;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import org.jline.builtins.Completers;
-import org.jline.reader.Completer;
-
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import javax.imageio.ImageIO;
+import org.jline.builtins.Completers;
+import org.jline.reader.Completer;
 
 @Parameters(
   commandNames = "jpeg",

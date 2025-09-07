@@ -1,7 +1,6 @@
 package au.com.southsky.jfreesane.jscanimage;
 
 import com.beust.jcommander.Parameters;
-
 import java.util.List;
 
 @Parameters(commandNames = "quit", commandDescription = "close the session and quit")

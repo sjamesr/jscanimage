@@ -5,7 +5,6 @@ import au.com.southsky.jfreesane.SaneDevice;
 import au.com.southsky.jfreesane.SaneException;
 import au.com.southsky.jfreesane.ScanListenerAdapter;
 import com.beust.jcommander.Parameters;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;

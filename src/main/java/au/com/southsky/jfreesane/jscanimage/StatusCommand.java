@@ -2,7 +2,6 @@ package au.com.southsky.jfreesane.jscanimage;
 
 import au.com.southsky.jfreesane.SaneDevice;
 import com.beust.jcommander.Parameters;
-
 import java.awt.image.BufferedImage;
 import java.util.List;
 

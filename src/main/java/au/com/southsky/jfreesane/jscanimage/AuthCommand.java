@@ -3,7 +3,6 @@ package au.com.southsky.jfreesane.jscanimage;
 import au.com.southsky.jfreesane.SanePasswordProvider;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-
 import java.util.List;
 
 @Parameters(

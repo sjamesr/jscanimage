@@ -4,7 +4,6 @@ import au.com.southsky.jfreesane.SaneDevice;
 import au.com.southsky.jfreesane.SaneSession;
 import com.beust.jcommander.JCommander;
 import com.google.common.collect.ImmutableList;
-
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.time.Instant;

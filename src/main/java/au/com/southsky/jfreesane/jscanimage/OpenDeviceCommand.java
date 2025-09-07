@@ -42,6 +42,7 @@ class OpenDeviceCommand implements Command {
 
   @Override
   public Completer getCompleter(Session session) {
-    return new StringsCompleter(session.getDevicesSeen().stream().map(SaneDevice::getName).toList());
+    return new StringsCompleter(
+        session.getDevicesSeen().stream().map(SaneDevice::getName).toList());
   }
 }

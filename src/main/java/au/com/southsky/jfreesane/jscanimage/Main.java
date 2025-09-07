@@ -7,11 +7,10 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.MissingCommandException;
 import com.beust.jcommander.Parameter;
 import com.google.common.net.HostAndPort;
-import org.jline.reader.*;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.List;
+import org.jline.reader.*;
 
 /**
  * The entry point for jscanimage.
