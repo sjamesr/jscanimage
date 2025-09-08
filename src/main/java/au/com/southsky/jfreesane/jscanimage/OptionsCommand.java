@@ -1,14 +1,21 @@
 package au.com.southsky.jfreesane.jscanimage;
 
 import au.com.southsky.jfreesane.*;
+import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.google.common.base.Joiner;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /** Lists options for the current device. */
 @Parameters(commandNames = "options", commandDescription = "list device options")
 public class OptionsCommand implements Command {
+
+  @Parameter(description = "if specified, filter the list to these options")
+  private List<String> optionNames = new ArrayList<>();
+
   @Override
   public void execute(Session session, List<String> parameters) {
     SaneDevice device = session.getCurrentDevice();
@@ -17,11 +24,17 @@ public class OptionsCommand implements Command {
       return;
     }
 
+    var filterNames = new HashSet<>(optionNames);
+
     try {
       List<SaneOption> options = device.listOptions();
 
       for (SaneOption option : options) {
         if ("".equals(option.getName())) {
+          continue;
+        }
+
+        if (!filterNames.isEmpty() && !filterNames.contains(option.getName())) {
           continue;
         }
 

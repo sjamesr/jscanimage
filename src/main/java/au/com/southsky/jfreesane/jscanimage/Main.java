@@ -18,22 +18,23 @@ public class Main {
   private static final Map<String, Supplier<Command>> commands;
 
   static {
-    commands = new HashMap<>();
-    commands.put("help", HelpCommand::new);
-    commands.put("quit", QuitCommand::new);
-    commands.put("open", OpenDeviceCommand::new);
-    commands.put("ls", ListScannersCommand::new);
-    commands.put("options", OptionsCommand::new);
-    commands.put("close", CloseDeviceCommand::new);
-    commands.put("scan", ScanCommand::new);
-    commands.put("jpeg", JpegCommand::new);
-    commands.put("status", StatusCommand::new);
+    commands = new LinkedHashMap<>();
     commands.put("auth", AuthCommand::new);
+    commands.put("close", CloseDeviceCommand::new);
+    commands.put("help", HelpCommand::new);
+    commands.put("jpeg", JpegCommand::new);
+    commands.put("ls", ListScannersCommand::new);
+    commands.put("open", OpenDeviceCommand::new);
+    commands.put("options", OptionsCommand::new);
+    commands.put("quit", QuitCommand::new);
+    commands.put("scan", ScanCommand::new);
+    commands.put("set", SetCommand::new);
+    commands.put("status", StatusCommand::new);
   }
 
   private final Session session;
 
-  public static void main(String[] args) throws IOException, SaneException {
+  public static void main(String[] args) throws IOException {
     Session session = new Session();
     JCommander globalOptionsParser = new JCommander();
     GlobalOptions o = new GlobalOptions();
@@ -127,6 +128,9 @@ public class Main {
       }
 
       JCommander jc = commander.getCommands().get(session.getMainJCommander().getParsedCommand());
+      if (jc == null) {
+        continue;
+      }
       if (jc.getObjects().size() != 1) {
         throw new IllegalStateException("expected exactly one JCommander object");
       }
