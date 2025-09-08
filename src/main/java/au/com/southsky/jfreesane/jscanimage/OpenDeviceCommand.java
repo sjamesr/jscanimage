@@ -19,19 +19,19 @@ class OpenDeviceCommand implements Command {
   public void execute(Session session, List<String> parameters) {
     if (scannerName.isEmpty()) {
       System.out.println("No scanner name specified.");
+      return;
     }
 
     SaneDevice currentDevice = session.getCurrentDevice();
     try {
-      String name = scannerName.getFirst();
       if (currentDevice != null && currentDevice.isOpen()) {
         System.out.println("Closing " + currentDevice.getName() + "...");
         currentDevice.close();
         session.setCurrentDevice(null);
         System.out.println("Closed.");
       }
-      System.out.println("Opening " + name + "...");
-      currentDevice = session.getSaneSession().getDevice(name);
+      System.out.println("Opening " + scannerName.getFirst() + "...");
+      currentDevice = session.getSaneSession().getDevice(scannerName.getFirst());
       currentDevice.open();
       System.out.println("Opened, fetching options...");
       currentDevice.listOptions();
