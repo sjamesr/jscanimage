@@ -29,7 +29,9 @@ public class OptionsCommand implements Command {
             option.getName()
                 + " ("
                 + printOptionValues(option)
-                + ")\n\t"
+                + ")"
+                + (!option.isActive() ? " (inactive)" : "")
+                + "\n\t"
                 + option.getDescription());
         System.out.println(printValidValues(option) + "\n");
       }
@@ -53,7 +55,7 @@ public class OptionsCommand implements Command {
         }
       case FIXED:
         if (option.getValueCount() == 1) {
-          return "" + option.getFixedValue();
+          return "" + formatDouble(option.getFixedValue());
         } else {
           return Joiner.on(",").join(formatDoubles(option.getFixedArrayValue()));
         }
@@ -114,7 +116,8 @@ public class OptionsCommand implements Command {
     String units = renderUnits(option.getUnits());
     return switch (option.getType()) {
       case INT -> Joiner.on("|").join(option.getIntegerValueListConstraint()) + units;
-      case FIXED -> Joiner.on("|").join(formatDoubles(option.getFixedValueListConstraint())) + units;
+      case FIXED ->
+          Joiner.on("|").join(formatDoubles(option.getFixedValueListConstraint())) + units;
       default -> "";
     };
   }
