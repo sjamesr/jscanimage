@@ -15,7 +15,9 @@ public class SetCommand implements Command {
   private List<String> optionNames = new ArrayList<>();
 
   @Override
-  public void execute(Session session, List<String> parameters) {}
+  public void execute(Session session, List<String> parameters) {
+    System.out.println(parameters);
+  }
 
   @Override
   public Completer getCompleter(Session session) {

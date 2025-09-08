@@ -68,9 +68,9 @@ public class OptionsCommand implements Command {
         }
       case FIXED:
         if (option.getValueCount() == 1) {
-          return "" + formatDouble(option.getFixedValue());
+          return OptionUtils.formatDouble(option.getFixedValue());
         } else {
-          return Joiner.on(",").join(formatDoubles(option.getFixedArrayValue()));
+          return Joiner.on(",").join(OptionUtils.formatDoubles(option.getFixedArrayValue()));
         }
       case BOOLEAN:
         return option.getBooleanValue() ? "yes" : "no";
@@ -99,7 +99,7 @@ public class OptionsCommand implements Command {
 
   private String renderRangeConstraint(SaneOption option) {
     RangeConstraint constraint = option.getRangeConstraints();
-    String units = renderUnits(option.getUnits());
+    String units = OptionUtils.renderUnits(option.getUnits());
     switch (option.getType()) {
       case INT:
         {
@@ -115,42 +115,24 @@ public class OptionsCommand implements Command {
         {
           double step = constraint.getQuantumFixed();
           return "from "
-              + formatDouble(constraint.getMinimumFixed())
+              + OptionUtils.formatDouble(constraint.getMinimumFixed())
               + " to "
-              + formatDouble(constraint.getMaximumFixed())
+              + OptionUtils.formatDouble(constraint.getMaximumFixed())
               + units
-              + (step != 0 ? (" in steps of " + formatDouble(step) + units) : "");
+              + (step != 0 ? (" in steps of " + OptionUtils.formatDouble(step) + units) : "");
         }
     }
     return "";
   }
 
   private String renderValueListConstraint(SaneOption option) {
-    String units = renderUnits(option.getUnits());
+    String units = OptionUtils.renderUnits(option.getUnits());
     return switch (option.getType()) {
       case INT -> Joiner.on("|").join(option.getIntegerValueListConstraint()) + units;
       case FIXED ->
-          Joiner.on("|").join(formatDoubles(option.getFixedValueListConstraint())) + units;
+          Joiner.on("|").join(OptionUtils.formatDoubles(option.getFixedValueListConstraint()))
+              + units;
       default -> "";
     };
-  }
-
-  private String renderUnits(SaneOption.OptionUnits units) {
-    return switch (units) {
-      case UNIT_MM -> "mm";
-      case UNIT_DPI -> "dpi";
-      case UNIT_BIT -> "bits";
-      case UNIT_MICROSECOND -> "µs";
-      case UNIT_PERCENT -> "%";
-      default -> "";
-    };
-  }
-
-  private List<String> formatDoubles(List<Double> doubles) {
-    return doubles.stream().map(d -> String.format("%3.3f", d)).toList();
-  }
-
-  private String formatDouble(Double d) {
-    return String.format("%3.3f", d);
   }
 }
