@@ -7,7 +7,9 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.google.common.base.Joiner;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.jline.reader.Completer;
 import org.jline.reader.impl.completer.ArgumentCompleter;
@@ -63,6 +65,16 @@ public class SetCommand implements Command {
       switch (option.getType()) {
         case STRING:
           {
+            byte[] desiredValue = value.getBytes(StandardCharsets.US_ASCII);
+            // The size we get from SANE includes the null terminating byte, so we deduct that from
+            // the max supported size.
+            int maxSize = option.getSize() - 1;
+
+            if (desiredValue.length > maxSize) {
+              System.out.println("Warning: truncated option to " + maxSize + " bytes");
+              value = new String(Arrays.copyOf(desiredValue, maxSize));
+            }
+
             String newValue = option.setStringValue(value);
             if (!newValue.equals(value)) {
               System.out.println(
