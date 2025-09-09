@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import org.jline.reader.Completer;
+import org.jline.reader.impl.completer.ArgumentCompleter;
+import org.jline.reader.impl.completer.StringsCompleter;
 
 /** Lists options for the current device. */
 @Parameters(commandNames = "options", commandDescription = "list device options")
@@ -134,5 +137,10 @@ public class OptionsCommand implements Command {
               + units;
       default -> "";
     };
+  }
+
+  @Override
+  public Completer getCompleter(Session session) {
+    return new ArgumentCompleter(new StringsCompleter("options"), new ScannerOptionNameCompleter(session));
   }
 }
